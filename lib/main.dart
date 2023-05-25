@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tester/webview.dart';
 import 'package:webviewx/webviewx.dart';
 
 void main() {
@@ -17,6 +18,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -53,96 +55,43 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-  late WebViewXController _controller;
-
+  TextEditingController urlController = TextEditingController();
+  String url = '';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('My WebView'),
+        title: const Text('My WebView'),
       ),
       body: SafeArea(
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          child: Stack(children: [
-            WebViewX(
-              key: const ValueKey('webviewx'),
-              initialContent: "https://dwb8g5mh70903.cloudfront.net/?organizationId=95ccf75e-c549-44e5-b3c6-d310af6d1e38&token=uti6q0iqt2bbc&orgUserIdType=institute_id&orgUserIdValue=kyofighter&cohortId=e581d889-1763-4d4f-a9da-834615fc48a6&programId=72354e11-b412-4914-bd0e-d6bf530bf6aa",
-              initialSourceType: SourceType.url,
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              javascriptMode: JavascriptMode.unrestricted,
-              onPageStarted: (_) {
-                // _loader.value = true;
-              },
-              onWebViewCreated: (controller) {
-                _controller = controller;
-              },
-              onPageFinished: (_) async {
-                // _loader.value = false;
-                // final content = await _controller.getContent();
-                //
-                // log(content.sourceType.toString());
-                // log(content.source.toString());
-                // log(content.headers.toString());
-                // log(content.webPostRequestBody.toString());
-              },
-              jsContent: const {
-                EmbeddedJsContent(
-                  js: "function testPlatformIndependentMethod() { messageHandler() }",
-                ),
-                EmbeddedJsContent(
-                  webJs:
-                  "function testPlatformSpecificMethod() { messageHandler() }",
-                  mobileJs:
-                  "function testPlatformSpecificMethod() { TestDartCallback.postMessage('Mobile callback says:') }",
-                ),
-              },
-              navigationDelegate: (navigation) {
-                debugPrint(navigation.content.sourceType.toString());
-                return NavigationDecision.navigate;
-              },
-              webSpecificParams: const WebSpecificParams(
-                printDebugInfo: true,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                autofocus: true,
+                controller: urlController,
               ),
-              mobileSpecificParams: const MobileSpecificParams(
-                androidEnableHybridComposition: true,
+              const SizedBox(height: 20),
+              MaterialButton(
+                color: Colors.blue,
+                child: const Text('Update Url'),
+                onPressed: () {
+                  url = urlController.text;
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (BuildContext context) => WebView(
+                        url: url,
+                      ),
+                    ),
+                  );
+                },
               ),
-              dartCallBacks: {
-                DartCallback(
-                  name: 'messageHandler',
-                  callBack: (message) async {
-                    ValueNotifier<WebViewContent> content =
-                    ValueNotifier<WebViewContent>(
-                        await _controller.getContent());
-                    content.addListener(() {
-                      if (content.value.webPostRequestBody != null) {
-                        // log(content.value.webPostRequestBody.toString());
-                      }
-                    });
-                    // log(content.value.sourceType.toString() + " Source type");
-                    // log(message.toString() + ' Message---');
-                    print(message.toString());
-                  },
-                )
-              },
-            ),
-
-          ]),
+            ],
+          ),
         ),
       ),
     );
