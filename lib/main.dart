@@ -1,10 +1,5 @@
-import 'dart:convert';
-
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tester/webview.dart';
-import 'package:webviewx/webviewx.dart';
 
 void main() {
   runApp(const MyApp());
